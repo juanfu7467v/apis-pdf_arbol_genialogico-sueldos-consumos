@@ -6,15 +6,8 @@ const cors = require('cors');
 const { Buffer } = require('buffer');
 const { v4: uuidv4 } = require('uuid');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const HOST = "0.0.0.0";
+const router = express.Router();
 
-app.use(cors());
-
-// --- URLS DE LAS APIS (desde secrets) ---
-const SUELDOS_API_URL = process.env.SUELDOS_API_URL || "";
-const CONSUMOS_API_URL = process.env.CONSUMOS_API_URL || "";
 const APK_LINK = "https://apk.e-droid.net/apk/app3790080-1f9e8a.apk?v=2";
 
 /**
@@ -118,7 +111,8 @@ const generatePDF = async (dni, data, tipo) => {
 
 // --- ENDPOINTS ---
 
-app.get("/consultar-sueldos", async (req, res) => {
+router.get("/consultar-sueldos", async (req, res) => {
+    const SUELDOS_API_URL = process.env.SUELDOS_API_URL || "";
     const { dni } = req.query;
     if (!dni) return res.status(400).json({ message: "DNI requerido" });
 
@@ -141,7 +135,8 @@ app.get("/consultar-sueldos", async (req, res) => {
     }
 });
 
-app.get("/consultar-consumos", async (req, res) => {
+router.get("/consultar-consumos", async (req, res) => {
+    const CONSUMOS_API_URL = process.env.CONSUMOS_API_URL || "";
     const { dni } = req.query;
     if (!dni) return res.status(400).json({ message: "DNI requerido" });
 
@@ -165,7 +160,9 @@ app.get("/consultar-consumos", async (req, res) => {
 });
 
 // Endpoint para descargar PDF directamente
-app.get("/descargar-pdf", async (req, res) => {
+router.get("/descargar-pdf", async (req, res) => {
+    const SUELDOS_API_URL = process.env.SUELDOS_API_URL || "";
+    const CONSUMOS_API_URL = process.env.CONSUMOS_API_URL || "";
     const { dni, tipo, filename } = req.query;
     if (!dni || !tipo) return res.status(400).json({ message: "DNI y tipo requeridos" });
 
@@ -206,24 +203,4 @@ app.get("/descargar-pdf", async (req, res) => {
     }
 });
 
-// Endpoint de prueba
-app.get("/", (req, res) => {
-    res.json({
-        message: "API de consultas PDF",
-        endpoints: {
-            consultar_sueldos: "/consultar-sueldos?dni=TU_DNI",
-            consultar_consumos: "/consultar-consumos?dni=TU_DNI",
-            descargar_pdf: "/descargar-pdf?dni=TU_DNI&tipo=SUELDOS_O_CONSUMOS"
-        },
-        config: {
-            sueldos_api: SUELDOS_API_URL ? "Configurada" : "No configurada",
-            consumos_api: CONSUMOS_API_URL ? "Configurada" : "No configurada"
-        }
-    });
-});
-
-app.listen(PORT, HOST, () => {
-    console.log(`Servidor PDF con QR optimizado activo en http://${HOST}:${PORT}`);
-    console.log(`SUELDOS_API_URL: ${SUELDOS_API_URL ? "Configurada" : "Usando valor por defecto"}`);
-    console.log(`CONSUMOS_API_URL: ${CONSUMOS_API_URL ? "Configurada" : "Usando valor por defecto"}`);
-});
+module.exports = router;

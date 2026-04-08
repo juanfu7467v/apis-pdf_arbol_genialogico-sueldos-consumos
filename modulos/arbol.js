@@ -3,13 +3,7 @@ const axios = require("axios");
 const cors = require("cors");
 const PDFDocument = require("pdfkit");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors());
-
-const API_BASE_URL = process.env.API_BASE_URL || "";
-const ARBOL_GENEALOGICO_API_URL = process.env.ARBOL_GENEALOGICO_API_URL || "";
+const router = express.Router();
 
 const COLORS = {
     PATERNA: "#3498DB",
@@ -164,7 +158,9 @@ function drawSimpleBarChart(doc, x, y, w, h, data, labels, color) {
 
 // --- RUTAS ---
 
-app.get("/consultar-arbol", async (req, res) => {
+router.get("/consultar-arbol", async (req, res) => {
+    const API_BASE_URL = process.env.API_BASE_URL || "";
+    const ARBOL_GENEALOGICO_API_URL = process.env.ARBOL_GENEALOGICO_API_URL || "";
     const dni = req.query.dni;
     if (!dni) return res.status(400).json({ error: "DNI requerido" });
     try {
@@ -180,7 +176,8 @@ app.get("/consultar-arbol", async (req, res) => {
     } catch (e) { res.status(500).send("Error API"); }
 });
 
-app.get("/descargar-arbol-pdf", async (req, res) => {
+router.get("/descargar-arbol-pdf", async (req, res) => {
+    const ARBOL_GENEALOGICO_API_URL = process.env.ARBOL_GENEALOGICO_API_URL || "";
     const dni = req.query.dni;
     try {
         const response = await axios.get(`${ARBOL_GENEALOGICO_API_URL}?dni=${dni}`);
@@ -292,4 +289,4 @@ app.get("/descargar-arbol-pdf", async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
+module.exports = router;
